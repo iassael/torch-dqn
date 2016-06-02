@@ -69,7 +69,7 @@ else
 end
 
 -- Initialise game
-local env = (require 'rlenvs.GridWorld') {
+local env = (require 'game.GridWorld') {
     puddles = opt.puddles == 1
 }
 local a_space = env:getActionSpec()[3]
