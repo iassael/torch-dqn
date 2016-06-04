@@ -24,7 +24,10 @@ cmd:option('-puddles', 1, 'PuddleWorld')
 
 -- model
 cmd:option('-gamma', 0.99, 'discount factor')
-cmd:option('-eps', 0.05, 'epsilon-greedy policy')
+cmd:option('-eps_start', 0.5, 'start ε-greedy policy')
+cmd:option('-eps_end', 0.05, 'final ε-greedy policy')
+cmd:option('-eps_endt', 100, 'final ε-greedy policy episode')
+cmd:option('-learn_start', 1, 'start learning episode')
 cmd:option('-replay_memory', 1e+5, 'experience replay memory')
 cmd:option('-action_gap', 1, 'increase the action gap')
 cmd:option('-action_gap_alpha', 0.9, 'action gap alpha parameter')
@@ -53,6 +56,7 @@ local kwargs = require 'include.kwargs'
 local log = require 'include.log'
 
 -- Set float as default type
+math.randomseed(opt.seed)
 torch.manualSeed(opt.seed)
 torch.setnumthreads(opt.threads)
 torch.setdefaulttensortype('torch.FloatTensor')
@@ -129,6 +133,11 @@ local beginning_time = torch.tic()
 
 for e = 1, opt.nepisodes do
 
+    -- ε-greedy annealing
+    opt.eps = (opt.eps_end +
+                math.max(0, (opt.eps_start - opt.eps_end) * (opt.eps_endt -
+                math.max(0, e - opt.learn_start)) / opt.eps_endt))
+
     -- Initial state
     local episode = {}
     episode.s_t = torch.Tensor(env:start())
@@ -144,7 +153,7 @@ for e = 1, opt.nepisodes do
         -- Compute Q values
         local q = model:forward(episode.s_t:type(opt.dtype))
 
-        -- Pick an action (epsilon-greedy)
+        -- Pick an action (ε-greedy)
         if torch.uniform() < opt.eps then
             episode.a_t = torch.random(a_space[2])
         else
@@ -278,11 +287,6 @@ for e = 1, opt.nepisodes do
             e, train_q, train_q_avg, train_r, train_r_avg, test_r, test_r_all:narrow(1, 1, e):mean(),
             sys.clock() - time, torch.toc(beginning_time) / 60)
     end
-
-    -- Save model
-    -- if #train_q % 10 == 0 then
-    --     save_model()
-    -- end
 end
 
 -- Plot Q values
