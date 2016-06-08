@@ -10,13 +10,13 @@ return function(opt)
         { 'a_size', type = 'int-pos' },
         { 's_size', type = 'int-pos' },
         { 'dtype', type = 'string', default = 'torch.FloatTensor' },
-        { 'lr', type = 'number', default = 1e-3 }
+        { 'lr', type = 'number', default = 5e-4 }
     })
 
     local exp = {}
 
     function exp.optim(iter)
-        local optimfunc = optim.rmsprop
+        local optimfunc = optim.rmspropm
         local optimconfig = { learningRate = opt.lr }
         return optimfunc, optimconfig
     end
