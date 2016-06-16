@@ -151,7 +151,7 @@ for e = 1, opt.nepisodes do
     while step <= opt.nsteps and not episode.terminal do
 
         -- Compute Q values
-        local q = model:forward(episode.s_t:type(opt.dtype))
+        local q = model:forward(episode.s_t:type(opt.dtype)):clone()
 
         -- Pick an action (ε-greedy)
         if torch.uniform() < opt.eps then
@@ -192,7 +192,7 @@ for e = 1, opt.nepisodes do
             end
 
             -- Compute Q
-            q = model:forward(train.s_t)
+            q = model:forward(train.s_t):clone()
 
             -- Use target network to predict q_max
             q_next = model_target:forward(train.s_t1)
@@ -214,7 +214,7 @@ for e = 1, opt.nepisodes do
 
             -- Increase the action gap
             if opt.action_gap == 1 then
-                local q_target = model_target:forward(train.s_t)
+                local q_target = model_target:forward(train.s_t):clone()
                 local V_s = q_target:max(2):squeeze()
                 local V_s_1 = q_next:max(2):squeeze()
                 for b = 1, opt.bs do
