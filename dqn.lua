@@ -195,7 +195,7 @@ for e = 1, opt.nepisodes do
             q = model:forward(train.s_t):clone()
 
             -- Use target network to predict q_max
-            q_next = model_target:forward(train.s_t1)
+            q_next = model_target:forward(train.s_t1):clone()
             q_next_max = q_next:max(2):squeeze(2)
 
             -- Check if terminal state
